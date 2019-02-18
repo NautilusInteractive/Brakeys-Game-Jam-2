@@ -5,12 +5,14 @@ using UnityEngine;
 public class Dog_Controller : MonoBehaviour
 {
     [SerializeField]
-    private float speed = 2.0f;
+    private float speed;
     [SerializeField]
-    private float turnSpeed = 4.0f;
+    private float turnSpeed;
+    [SerializeField]
+    private float barkRadius;
 
     private Vector3 direction;
-    // Update is called once per frame
+
     void Update()
     {
         Move();
@@ -34,6 +36,18 @@ public class Dog_Controller : MonoBehaviour
 
     private void Bark() {
         Debug.Log("Bark");
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, barkRadius);
+        int i = 0;
+        while (i < hitColliders.Length) {
+            switch (hitColliders[i].tag) {
+                case "Person":
+                    hitColliders[i].GetComponent<Person_Controller>().OnBark();
+                    break;
+                case "Enemy":
+                    break;
+            }
+            i++;
+        }
     }
 
     private void Interact() {

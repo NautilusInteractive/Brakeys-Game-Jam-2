@@ -4,24 +4,35 @@ using UnityEngine;
 
 public class Person_Controller : MonoBehaviour
 {
+    public bool canMove;
     [SerializeField]
+    private float speed;
+    [SerializeField]
+    private float turnSpeed;
+
+    public GameObject dog;
     private Vector3 direction;
-    [SerializeField]
-    private bool move;
-    [SerializeField]
-    private float speed = 2.0f;
-    // Start is called before the first frame update
+
     void Start()
     {
         direction = transform.forward;
-        move = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (move) {
-            transform.Translate(direction * Time.deltaTime * speed);
+        if (canMove) {
+            transform.Translate(direction * Time.deltaTime * speed, Space.World);
+
+            Vector3 lookDirection = Vector3.RotateTowards(transform.forward, direction, turnSpeed * Time.deltaTime, 0.0f);
+            // Move our position a step closer to the target.
+            transform.rotation = Quaternion.LookRotation(lookDirection);
         }
+    }
+
+    public void OnBark() {
+        direction -= dog.transform.position;
+        direction.x = Mathf.Clamp(direction.x, -speed, speed);
+        direction.z = Mathf.Clamp(direction.z, -speed, speed);
+        direction.y = 0.0f;
     }
 }
