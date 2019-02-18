@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Person_Controller : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class Person_Controller : MonoBehaviour
     private float speed;
     [SerializeField]
     private float turnSpeed;
+    [SerializeField]
+    private int lives;
 
     public GameObject dog;
     private Vector3 direction;
@@ -34,5 +37,27 @@ public class Person_Controller : MonoBehaviour
         direction.x = Mathf.Clamp(direction.x, -speed, speed);
         direction.z = Mathf.Clamp(direction.z, -speed, speed);
         direction.y = 0.0f;
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        if (collision.gameObject.tag == "Obstacle") {
+            lives--;
+            if (lives <= 0) {
+                GameOver();
+            }
+            else {
+                Respawn();
+            }
+        }
+    }
+
+    private void Respawn() {
+        Vector3 spawnPosition = transform.position;
+        spawnPosition.z -= 2.0f;
+        transform.position = spawnPosition;
+    }
+
+    private void GameOver() {
+        SceneManager.LoadScene("Game Over");
     }
 }
