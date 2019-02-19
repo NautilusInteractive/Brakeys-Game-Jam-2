@@ -33,22 +33,9 @@ public class Person_Controller : MonoBehaviour
     }
 
     public void OnBark() {
-        direction -= dog.transform.position;
-        direction.x = Mathf.Clamp(direction.x, -speed, speed);
-        direction.z = Mathf.Clamp(direction.z, -speed, speed);
+        direction = transform.position - dog.transform.position;
+        direction /= direction.magnitude;
         direction.y = 0.0f;
-    }
-
-    private void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.tag == "Obstacle") {
-            lives--;
-            if (lives <= 0) {
-                GameOver();
-            }
-            else {
-                Respawn();
-            }
-        }
     }
 
     private void Respawn() {
@@ -59,5 +46,27 @@ public class Person_Controller : MonoBehaviour
 
     private void GameOver() {
         SceneManager.LoadScene("Game Over");
+    }
+
+    private void OnCollisionEnter(Collision collision) {
+        switch (collision.gameObject.tag) {
+            case "Obstacle":
+                lives--;
+                if (lives <= 0) {
+                    GameOver();
+                }
+                else {
+                    Respawn();
+                }
+                break;
+            case "Dog":
+                canMove = false;
+                break;
+        }
+    }
+    private void OnCollisionExit(Collision collision) {
+        if (collision.gameObject.tag == "Dog") {
+            canMove = true;
+        }
     }
 }
