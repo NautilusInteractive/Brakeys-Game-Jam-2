@@ -11,7 +11,12 @@ public class Dog_Controller : MonoBehaviour
     [SerializeField]
     private float barkRadius;
 
-    private Vector3 direction;
+    private Vector3 MoveDirection;
+    private CharacterController controller;
+
+    void Start() {
+        controller = GetComponent<CharacterController>();    
+    }
 
     void Update()
     {
@@ -26,16 +31,18 @@ public class Dog_Controller : MonoBehaviour
     }
 
     private void Move() {
-        direction = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
-        transform.Translate(direction * Time.deltaTime * speed, Space.World);
+        MoveDirection = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical")) * speed;
+        if (!controller.isGrounded)
+            MoveDirection += Physics.gravity;
+        controller.Move(MoveDirection * Time.deltaTime);
 
-        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, direction, turnSpeed * Time.deltaTime, 0.0f);
-        // Move our position a step closer to the target.
+        MoveDirection.y = 0.0f;
+        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, MoveDirection, turnSpeed * Time.deltaTime, 0.0f);
         transform.rotation = Quaternion.LookRotation(lookDirection);
     }
 
     private void Bark() {
-        Debug.Log("Bark");
+        //Debug.Log("Bark");
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, barkRadius);
         int i = 0;
         while (i < hitColliders.Length) {

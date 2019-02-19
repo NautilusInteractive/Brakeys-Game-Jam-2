@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Person_Controller : MonoBehaviour
 {
@@ -10,26 +9,34 @@ public class Person_Controller : MonoBehaviour
     private float speed;
     [SerializeField]
     private float turnSpeed;
-    [SerializeField]
-    private int lives;
 
+    public GameObject UI;
     public GameObject dog;
     private Vector3 direction;
+    private CharacterController controller;
 
     void Start()
     {
         direction = transform.forward;
+        controller = GetComponent<CharacterController>();
     }
 
     void Update()
     {
         if (canMove) {
-            transform.Translate(direction * Time.deltaTime * speed, Space.World);
-
-            Vector3 lookDirection = Vector3.RotateTowards(transform.forward, direction, turnSpeed * Time.deltaTime, 0.0f);
-            // Move our position a step closer to the target.
-            transform.rotation = Quaternion.LookRotation(lookDirection);
+            Move();
         }
+    }
+
+    private void Move() {
+        Vector3 MoveDirection = direction * speed;
+        if (!controller.isGrounded)
+            MoveDirection += Physics.gravity;
+        controller.Move(MoveDirection * Time.deltaTime);
+
+        MoveDirection.y = 0.0f;
+        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, MoveDirection, turnSpeed * Time.deltaTime, 0.0f);
+        transform.rotation = Quaternion.LookRotation(lookDirection);
     }
 
     public void OnBark() {
@@ -44,20 +51,11 @@ public class Person_Controller : MonoBehaviour
         transform.position = spawnPosition;
     }
 
-    private void GameOver() {
-        SceneManager.LoadScene("Game Over");
-    }
-
     private void OnCollisionEnter(Collision collision) {
         switch (collision.gameObject.tag) {
             case "Obstacle":
-                lives--;
-                if (lives <= 0) {
-                    GameOver();
-                }
-                else {
-                    Respawn();
-                }
+                UI.GetComponent<UI_Controller>().loseLive();
+                Respawn();
                 break;
             case "Dog":
                 canMove = false;
